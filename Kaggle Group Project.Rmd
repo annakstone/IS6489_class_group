@@ -1,0 +1,18 @@
+---
+title: "Kaggle Project"
+author: "Tina Young"
+date: "`r Sys.Date()`"
+output:
+  word_document:
+    toc: true
+  html_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message= F, warning = F)
+library(tidyverse)
+library(dplyr)
+```
+
+
