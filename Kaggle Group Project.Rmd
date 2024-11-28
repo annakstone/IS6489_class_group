@@ -10,9 +10,250 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+# This code chunk sets global options.
+
 knitr::opts_chunk$set(echo = TRUE, message= F, warning = F)
+
+# message= F and  warning = F suppress verbose information getting printed in 
+# the compiled document.
+
+# echo = T ensures that your code is visible.
+
+# Load packages
+
 library(tidyverse)
 library(dplyr)
+
+# Load data
+
+train <- read.csv("C:/Users/young/OneDrive/Documents/Masters/IS 6489 Stats and Pred Analytics/Kaggle/train.csv")
+test <- read.csv("C:/Users/young/OneDrive/Documents/Masters/IS 6489 Stats and Pred Analytics/Kaggle/test.csv")
 ```
+
+# Introduction
+
+The goal of this project is to create a model to predict house prices in Ames, Iowa. This training data consists of 1,460 observations and contains 79 explanatory variables. The predictive model will focus on 13 variables.  combining the predictors with a mixture of additive and interactions methods. 
+
+# Description of Data
+
+```{r}
+# Check for NAs
+na <- colSums(is.na(train))
+na[na > 0]
+```
+
+**Missing Data**
+
+These values are legitimately missing and will be imputed with the median from the respective variable. 
+
+- **LotFrontage**: 259 values
+- **Electrical**: 1 value
+- **MasVnrType and MasVnrArea**: 8 values each
+
+**NA is Meaningful**
+
+NA is being used to encode a missing feature. These values will be replaced with "none" instead of NA. 
+
+- **Alley**: No alley access
+- **BsmtQual, BsmtCond, BsmtExposure, BsmtFinType1, BsmtFinType2**: No Basement
+- **FireplaceQu**: No Fireplace
+- **GarageType, GarageYrBlt, GarageFinish, GarageQual, GarageCond**: No Garage
+- **PoolQC**: No Pool
+- **Fence**: No Fence
+- **MiscFeature**: None
+
+**Cleaning Data**
+```{r}
+#Updating data for meaningful NA values
+train <- train |>
+  mutate(GarageFinish = replace_na(data = GarageFinish, replace = "NoGarage"), 
+         GarageQual = replace_na(data = GarageQual, replace = "NoGarage"), 
+         GarageCond = replace_na(data = GarageCond, replace = "NoGarage"), 
+         PoolQC = replace_na(data = PoolQC, replace = "NoPool"), 
+         Fence = replace_na(data = Fence, replace = "NoFence"), 
+         MiscFeature = replace_na(data = MiscFeature, replace = "None"), 
+         GarageYrBlt = replace_na(data = GarageYrBlt, replace = 0), 
+         Alley = replace_na(data = Alley, replace = "NoAlley"), 
+         GarageType = replace_na(data = GarageType, replace = "NoGarage"), 
+         BsmtQual = replace_na(data = BsmtQual, replace = "NoBasement"),
+         BsmtCond = replace_na(data = BsmtCond, replace = "NoBasement"),
+         BsmtExposure = replace_na(data = BsmtExposure, replace = "NoBasement"),
+         BsmtFinType1 = replace_na(data = BsmtFinType1, replace = "NoBasement"),
+         BsmtFinType2 = replace_na(data = BsmtFinType2, replace = "NoBasement"),
+         MasVnrType = replace_na(data = MasVnrType, replace = "BrkFace"), #BrkFace for median value
+         FireplaceQu = replace_na(data = FireplaceQu, replace = "None"),
+         Electrical = replace_na(data = Electrical, replace = "FuseA") #FuseA for median value
+         )
+
+
+train <- train |>
+  mutate(LotFrontage = replace_na(LotFrontage, median(LotFrontage, na.rm = T)), # getting the median value without the 259 NA values of the original data
+         MasVnrArea = replace_na(MasVnrArea, median(MasVnrArea, na.rm = T))) #median value for MasVnrArea
+```
+
+
+```{r message = F}
+# Create scatterplot SalePrice ~ OverallQual to check if data is linear
+ggplot(train, aes(as.numeric(OverallQual), SalePrice)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = F) +
+  geom_smooth(se = F, col = 2) + # Local regression named LOESS
+  labs(title = "SalePrice ~ OverallQual, with linear and local regression")
+```
+
+OverallQual should be factored. There is a non-linear relationship between OverallQual and SalesPrice. 
+
+```{r}
+# Define function to find the mode of a character vector
+find_mode <- function(x){
+  table(x) %>% 
+    which.max() %>% 
+    names()
+}
+# Replace NAs and Factor
+train <- train |>
+  mutate(OverallQual = factor(OverallQual),
+         BsmtQual = replace_na(data = BsmtQual, 
+                                       replace = "No Basement"),
+         LotFrontage = replace_na(data = LotFrontage, replace = median(LotFrontage, na.rm = TRUE)),
+         BsmtCond = replace_na(data = BsmtCond, replace = find_mode(BsmtCond)))
+
+# Check for NAs
+na <- colSums(is.na(train))
+na[na > 0]
+```
+
+# Selected Explanatory Variables
+```{r results='hide'}
+# Fit simple linear regression model
+
+r1 <- lm(SalePrice ~ ExterQual, data = train)
+summary(r1)
+
+r2 <- lm(SalePrice ~ KitchenQual, data = train)
+summary(r2)
+
+r3 <- lm(SalePrice ~ OverallQual, data = train)
+summary(r3)
+
+r4 <- lm(SalePrice ~ GrLivArea, data = train)
+summary(r4)
+
+r5 <- lm(SalePrice ~ Neighborhood, data = train)
+summary(r5)
+
+r6 <- lm(SalePrice ~ BsmtQual, data = train)
+summary(r6)
+
+r7 <- lm(SalePrice ~ TotalBsmtSF, data = train)
+summary(r7)
+
+r8 <- lm(SalePrice ~ LotArea, data = train)
+summary(r8)
+
+r9 <- lm(SalePrice ~ OverallCond, data = train)
+summary(r9)
+
+r10 <- lm(SalePrice ~ YearBuilt, data = train)
+summary(r10)
+
+r11 <- lm(SalePrice ~ Fireplaces, data = train)
+summary(r11)
+
+r12 <- lm(SalePrice ~ LotShape, data = train)
+summary(r12)
+
+i <- lm(SalePrice ~ GarageCars * GrLivArea, data = train)
+summary(i)
+```
+
+# Cross Validation
+
+```{r}
+# Randomly sample 70% of the rows
+set.seed(123)
+index <- sample(x = 1:nrow(train), size = nrow(train)*.7, replace = F)
+
+head(index) # These are row numbers
+
+# Subset train using the index to create train_fold
+train_fold <- train[index, ]
+
+# Subset the remaining row to create validation fold.
+validation_fold <- train[-index, ]
+```
+
+```{r}
+# Fit example model
+model <- lm(SalePrice ~ GarageCars * GrLivArea + TotalBsmtSF + BsmtQual + ExterQual + KitchenQual + OverallQual + LotArea + Neighborhood + OverallCond + YearBuilt + Fireplaces + LotShape, data = train_fold)
+
+summary(model)
+
+# Get predictions for the train fold
+predictions <- predict(model, newdata = train_fold)
+
+# Create functions for calculating RMSE and R-squared
+rmse <- function(observed, predicted) sqrt(mean((observed - predicted)^2))
+
+R2 <- function(observed, predicted){
+  TSS <- sum((observed - mean(observed))^2)
+  RSS <- sum((observed - predicted)^2)
+  1- RSS/TSS
+}
+
+# Calculate RMSE and R-squared
+rmse(train_fold$SalePrice, predictions)
+R2(train_fold$SalePrice, predictions)
+```
+
+```{r}
+# Get predictions for the validation fold
+predictions.v <- predict(model, newdata = validation_fold)
+
+# Calculate RMSE and R-squared
+rmse(validation_fold$SalePrice, predictions.v)
+R2(validation_fold$SalePrice, predictions.v)
+```
+
+# Predictions
+
+```{r}
+# Fit your model to the entire train set.
+submission_model <- lm(SalePrice ~ GarageCars * GrLivArea + TotalBsmtSF + BsmtQual + ExterQual + KitchenQual + OverallQual + LotArea + Neighborhood + OverallCond + YearBuilt + Fireplaces + LotShape, data = train)
+
+# Make exactly the same changes to the test set that you made to the train set.
+test <- test |>
+   mutate(OverallQual = factor(OverallQual),
+         BsmtQual = replace_na(data = BsmtQual, 
+                                       replace = "No Basement"),
+         LotFrontage = replace_na(data = LotFrontage, replace = median(LotFrontage, na.rm = TRUE)),
+         BsmtCond = replace_na(data = BsmtCond, replace = find_mode(BsmtCond)),
+         GarageCars = replace_na(data = GarageCars, replace = median(GarageCars, na.rm = TRUE)),
+         TotalBsmtSF = replace_na(data = TotalBsmtSF, replace = median(TotalBsmtSF, na.rm = TRUE)),
+         KitchenQual = replace_na(data = KitchenQual, replace = find_mode(KitchenQual)))
+
+# Check there are no missing observations for your selected predictors in the test set.
+test |>
+  select(GarageCars, GrLivArea, TotalBsmtSF, BsmtQual, ExterQual, KitchenQual, OverallQual, LotArea, Neighborhood, OverallCond, YearBuilt, Fireplaces, LotShape) |> 
+  summarize_all(~sum(is.na(.)))
+
+# Make predictions for the test set.
+submission_predictions <- predict(submission_model, newdata = test) # Use the newdata argument!
+
+head(submission_predictions)
+
+# Format your submission file.
+
+submission <- test |>
+  select(Id) |>
+  mutate(SalePrice = submission_predictions)
+
+# Check
+head(submission)
+
+# write to csv
+write.csv(submission, "kaggle_group_submission.csv", row.names = F)
+```
+
 
 
