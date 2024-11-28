@@ -1,6 +1,6 @@
 ---
 title: "Kaggle Project"
-author: "Tina Young, Anna Stone"
+author: "Tina Young"
 date: "`r Sys.Date()`"
 output:
   word_document:
