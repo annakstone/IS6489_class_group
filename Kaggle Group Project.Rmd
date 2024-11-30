@@ -32,7 +32,7 @@ test <- read.csv("C:/Users/young/OneDrive/Documents/Masters/IS 6489 Stats and Pr
 
 # Introduction
 
-The goal of this project is to create a model to predict house prices in Ames, Iowa. This training data consists of 1,460 observations and contains 79 explanatory variables. The predictive model will focus on 13 variables.  combining the predictors with a mixture of additive and interactions methods. 
+The goal of this project is to create a model to predict house prices in Ames, Iowa. This training data consists of 1,460 observations and contains 79 explanatory variables. The predictive model will focus on 13 variables combined with a mixture of additive and interaction methods to predict the target variable, sale price. 
 
 # Description of Data
 
@@ -64,7 +64,7 @@ NA is being used to encode a missing feature. These values will be replaced with
 
 **Cleaning Data**
 ```{r}
-#Updating data for meaningful NA values
+#Replace NA values
 train <- train |>
   mutate(GarageFinish = replace_na(data = GarageFinish, replace = "NoGarage"), 
          GarageQual = replace_na(data = GarageQual, replace = "NoGarage"), 
@@ -82,12 +82,8 @@ train <- train |>
          BsmtFinType2 = replace_na(data = BsmtFinType2, replace = "NoBasement"),
          MasVnrType = replace_na(data = MasVnrType, replace = "BrkFace"), #BrkFace for median value
          FireplaceQu = replace_na(data = FireplaceQu, replace = "None"),
-         Electrical = replace_na(data = Electrical, replace = "FuseA") #FuseA for median value
-         )
-
-
-train <- train |>
-  mutate(LotFrontage = replace_na(LotFrontage, median(LotFrontage, na.rm = T)), # getting the median value without the 259 NA values of the original data
+         Electrical = replace_na(data = Electrical, replace = "FuseA"), #FuseA for median value
+         LotFrontage = replace_na(LotFrontage, median(LotFrontage, na.rm = T)), # getting the median value without the 259 NA values of the original data
          MasVnrArea = replace_na(MasVnrArea, median(MasVnrArea, na.rm = T))) #median value for MasVnrArea
 ```
 
@@ -104,19 +100,12 @@ ggplot(train, aes(as.numeric(OverallQual), SalePrice)) +
 OverallQual should be factored. There is a non-linear relationship between OverallQual and SalesPrice. 
 
 ```{r}
-# Define function to find the mode of a character vector
-find_mode <- function(x){
-  table(x) %>% 
-    which.max() %>% 
-    names()
-}
 # Replace NAs and Factor
 train <- train |>
   mutate(OverallQual = factor(OverallQual),
-         BsmtQual = replace_na(data = BsmtQual, 
-                                       replace = "No Basement"),
+         BsmtQual = replace_na(data = BsmtQual, replace = "No Basement"),
          LotFrontage = replace_na(data = LotFrontage, replace = median(LotFrontage, na.rm = TRUE)),
-         BsmtCond = replace_na(data = BsmtCond, replace = find_mode(BsmtCond)))
+         BsmtCond = replace_na(data = BsmtCond, replace = "No Basement"))
 
 # Check for NAs
 na <- colSums(is.na(train))
@@ -222,12 +211,19 @@ R2(validation_fold$SalePrice, predictions.v)
 submission_model <- lm(SalePrice ~ GarageCars * GrLivArea + TotalBsmtSF + BsmtQual + ExterQual + KitchenQual + OverallQual + LotArea + Neighborhood + OverallCond + YearBuilt + Fireplaces + LotShape, data = train)
 
 # Make exactly the same changes to the test set that you made to the train set.
+## Define function to find the mode of a character vector
+find_mode <- function(x){
+  table(x) %>% 
+    which.max() %>% 
+    names()
+}
+
 test <- test |>
    mutate(OverallQual = factor(OverallQual),
          BsmtQual = replace_na(data = BsmtQual, 
                                        replace = "No Basement"),
          LotFrontage = replace_na(data = LotFrontage, replace = median(LotFrontage, na.rm = TRUE)),
-         BsmtCond = replace_na(data = BsmtCond, replace = find_mode(BsmtCond)),
+         BsmtCond = replace_na(data = BsmtCond, replace = "No Basement"),
          GarageCars = replace_na(data = GarageCars, replace = median(GarageCars, na.rm = TRUE)),
          TotalBsmtSF = replace_na(data = TotalBsmtSF, replace = median(TotalBsmtSF, na.rm = TRUE)),
          KitchenQual = replace_na(data = KitchenQual, replace = find_mode(KitchenQual)))
