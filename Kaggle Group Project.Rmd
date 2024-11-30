@@ -236,9 +236,10 @@ test <- test |>
          FireplaceQu = replace_na(data = FireplaceQu, replace = "None"),
          Electrical = replace_na(data = Electrical, replace = find_mode(Electrical)), 
          LotFrontage = replace_na(LotFrontage, median(LotFrontage, na.rm = T)), 
-         MasVnrArea = replace_na(MasVnrArea, median(MasVnrArea, na.rm = T))) 
+         MasVnrArea = replace_na(MasVnrArea, median(MasVnrArea, na.rm = T)), 
          TotalBsmtSF = replace_na(data = TotalBsmtSF, replace = median(TotalBsmtSF, na.rm = TRUE)),
-         KitchenQual = replace_na(data = KitchenQual, replace = find_mode(KitchenQual)))
+         KitchenQual = replace_na(data = KitchenQual, replace = find_mode(KitchenQual)),
+         GarageCars = replace_na(data = GarageCars, replace = median(GarageCars, na.rm = TRUE)))
 
 # Check there are no missing observations for your selected predictors in the test set.
 test |>
