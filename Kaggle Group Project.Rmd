@@ -62,10 +62,17 @@ NA is being used to encode a missing feature. These values will be replaced with
 - **Fence**: No Fence
 - **MiscFeature**: None
 
-**Cleaning Data**
+**Clean Data**
 
 ```{r}
 #Replace NA values
+## Define function to find the mode of a character vector
+find_mode <- function(x){
+  table(x) %>% 
+    which.max() %>% 
+    names()
+}
+
 train <- train |>
   mutate(GarageFinish = replace_na(data = GarageFinish, replace = "NoGarage"), 
          GarageQual = replace_na(data = GarageQual, replace = "NoGarage"), 
@@ -81,11 +88,11 @@ train <- train |>
          BsmtExposure = replace_na(data = BsmtExposure, replace = "NoBasement"),
          BsmtFinType1 = replace_na(data = BsmtFinType1, replace = "NoBasement"),
          BsmtFinType2 = replace_na(data = BsmtFinType2, replace = "NoBasement"),
-         MasVnrType = replace_na(data = MasVnrType, replace = "BrkFace"), #BrkFace for median value
+         MasVnrType = replace_na(data = MasVnrType, replace = find_mode(MasVnrType)), 
          FireplaceQu = replace_na(data = FireplaceQu, replace = "None"),
-         Electrical = replace_na(data = Electrical, replace = "FuseA"), #FuseA for median value
-         LotFrontage = replace_na(LotFrontage, median(LotFrontage, na.rm = T)), # getting the median value without the 259 NA values of the original data
-         MasVnrArea = replace_na(MasVnrArea, median(MasVnrArea, na.rm = T))) #median value for MasVnrArea
+         Electrical = replace_na(data = Electrical, replace = find_mode(Electrical)),
+         LotFrontage = replace_na(LotFrontage, median(LotFrontage, na.rm = T)), 
+         MasVnrArea = replace_na(MasVnrArea, median(MasVnrArea, na.rm = T))) 
 
 # Check for NAs
 na <- colSums(is.na(train))
@@ -208,12 +215,6 @@ R2(validation_fold$SalePrice, predictions.v)
 submission_model <- lm(SalePrice ~ GarageCars * GrLivArea + TotalBsmtSF + BsmtQual + ExterQual + KitchenQual + OverallQual + LotArea + Neighborhood + OverallCond + YearBuilt + Fireplaces + LotShape, data = train)
 
 # Make exactly the same changes to the test set that you made to the train set.
-## Define function to find the mode of a character vector
-find_mode <- function(x){
-  table(x) %>% 
-    which.max() %>% 
-    names()
-}
 
 test <- test |>
    mutate(OverallQual = factor(OverallQual), 
@@ -231,11 +232,11 @@ test <- test |>
          BsmtExposure = replace_na(data = BsmtExposure, replace = "NoBasement"),
          BsmtFinType1 = replace_na(data = BsmtFinType1, replace = "NoBasement"),
          BsmtFinType2 = replace_na(data = BsmtFinType2, replace = "NoBasement"),
-         MasVnrType = replace_na(data = MasVnrType, replace = "BrkFace"), #BrkFace for median value
+         MasVnrType = replace_na(data = MasVnrType, replace = find_mode(MasVnrType)), 
          FireplaceQu = replace_na(data = FireplaceQu, replace = "None"),
-         Electrical = replace_na(data = Electrical, replace = "FuseA"), #FuseA for median value
-         LotFrontage = replace_na(LotFrontage, median(LotFrontage, na.rm = T)), # getting the median value without the 259 NA values of the original data
-         MasVnrArea = replace_na(MasVnrArea, median(MasVnrArea, na.rm = T))) #median value for MasVnrArea
+         Electrical = replace_na(data = Electrical, replace = find_mode(Electrical)), 
+         LotFrontage = replace_na(LotFrontage, median(LotFrontage, na.rm = T)), 
+         MasVnrArea = replace_na(MasVnrArea, median(MasVnrArea, na.rm = T))) 
          TotalBsmtSF = replace_na(data = TotalBsmtSF, replace = median(TotalBsmtSF, na.rm = TRUE)),
          KitchenQual = replace_na(data = KitchenQual, replace = find_mode(KitchenQual)))
 
