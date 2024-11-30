@@ -63,6 +63,7 @@ NA is being used to encode a missing feature. These values will be replaced with
 - **MiscFeature**: None
 
 **Cleaning Data**
+
 ```{r}
 #Replace NA values
 train <- train |>
@@ -85,8 +86,11 @@ train <- train |>
          Electrical = replace_na(data = Electrical, replace = "FuseA"), #FuseA for median value
          LotFrontage = replace_na(LotFrontage, median(LotFrontage, na.rm = T)), # getting the median value without the 259 NA values of the original data
          MasVnrArea = replace_na(MasVnrArea, median(MasVnrArea, na.rm = T))) #median value for MasVnrArea
-```
 
+# Check for NAs
+na <- colSums(is.na(train))
+na[na > 0]
+```
 
 ```{r message = F}
 # Create scatterplot SalePrice ~ OverallQual to check if data is linear
@@ -100,16 +104,9 @@ ggplot(train, aes(as.numeric(OverallQual), SalePrice)) +
 OverallQual should be factored. There is a non-linear relationship between OverallQual and SalesPrice. 
 
 ```{r}
-# Replace NAs and Factor
+# Factor OverallQual
 train <- train |>
-  mutate(OverallQual = factor(OverallQual),
-         BsmtQual = replace_na(data = BsmtQual, replace = "No Basement"),
-         LotFrontage = replace_na(data = LotFrontage, replace = median(LotFrontage, na.rm = TRUE)),
-         BsmtCond = replace_na(data = BsmtCond, replace = "No Basement"))
-
-# Check for NAs
-na <- colSums(is.na(train))
-na[na > 0]
+  mutate(OverallQual = factor(OverallQual))
 ```
 
 # Selected Explanatory Variables
@@ -219,12 +216,26 @@ find_mode <- function(x){
 }
 
 test <- test |>
-   mutate(OverallQual = factor(OverallQual),
-         BsmtQual = replace_na(data = BsmtQual, 
-                                       replace = "No Basement"),
-         LotFrontage = replace_na(data = LotFrontage, replace = median(LotFrontage, na.rm = TRUE)),
-         BsmtCond = replace_na(data = BsmtCond, replace = "No Basement"),
-         GarageCars = replace_na(data = GarageCars, replace = median(GarageCars, na.rm = TRUE)),
+   mutate(OverallQual = factor(OverallQual), 
+         GarageFinish = replace_na(data = GarageFinish, replace = "NoGarage"), 
+         GarageQual = replace_na(data = GarageQual, replace = "NoGarage"), 
+         GarageCond = replace_na(data = GarageCond, replace = "NoGarage"), 
+         PoolQC = replace_na(data = PoolQC, replace = "NoPool"), 
+         Fence = replace_na(data = Fence, replace = "NoFence"), 
+         MiscFeature = replace_na(data = MiscFeature, replace = "None"), 
+         GarageYrBlt = replace_na(data = GarageYrBlt, replace = 0), 
+         Alley = replace_na(data = Alley, replace = "NoAlley"), 
+         GarageType = replace_na(data = GarageType, replace = "NoGarage"), 
+         BsmtQual = replace_na(data = BsmtQual, replace = "NoBasement"),
+         BsmtCond = replace_na(data = BsmtCond, replace = "NoBasement"),
+         BsmtExposure = replace_na(data = BsmtExposure, replace = "NoBasement"),
+         BsmtFinType1 = replace_na(data = BsmtFinType1, replace = "NoBasement"),
+         BsmtFinType2 = replace_na(data = BsmtFinType2, replace = "NoBasement"),
+         MasVnrType = replace_na(data = MasVnrType, replace = "BrkFace"), #BrkFace for median value
+         FireplaceQu = replace_na(data = FireplaceQu, replace = "None"),
+         Electrical = replace_na(data = Electrical, replace = "FuseA"), #FuseA for median value
+         LotFrontage = replace_na(LotFrontage, median(LotFrontage, na.rm = T)), # getting the median value without the 259 NA values of the original data
+         MasVnrArea = replace_na(MasVnrArea, median(MasVnrArea, na.rm = T))) #median value for MasVnrArea
          TotalBsmtSF = replace_na(data = TotalBsmtSF, replace = median(TotalBsmtSF, na.rm = TRUE)),
          KitchenQual = replace_na(data = KitchenQual, replace = find_mode(KitchenQual)))
 
