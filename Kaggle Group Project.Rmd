@@ -156,9 +156,26 @@ summary(r11)
 r12 <- lm(SalePrice ~ LotShape, data = train)
 summary(r12)
 
+r13 <- lm(SalePrice ~ GarageCars, data = train)
+summary(r13)
+
 i <- lm(SalePrice ~ GarageCars * GrLivArea, data = train)
 summary(i)
 ```
+
+1) **ExterQual**: Evaluates the quality of the material on the exterior
+2) **KitchenQual**: Kitchen quality
+3) **OverallQual**: Rates the overall material and finish of the house
+4) **GrLivArea**: Above grade (ground) living area square feet
+5) **Neighborhood**: Physical locations within Ames city limits
+6) **BsmtQual**: Height of the basement
+7) **TotalBsmtSF**: Total square feet of basement area
+8) **LotArea**: Lot size in square feet
+9) **OverallCond**: Overall condition rating
+10) **YearBuilt**: Original construction date
+11) **Fireplaces**: Number of fireplaces
+12) **LotShape**: General shape of property
+13) **GarageCars**: Size of garage in car capacity
 
 # Cross Validation
 
@@ -194,19 +211,23 @@ R2 <- function(observed, predicted){
   1- RSS/TSS
 }
 
-# Calculate RMSE and R-squared
+# Calculate RMSE and R-squared for train fold
 rmse(train_fold$SalePrice, predictions)
 R2(train_fold$SalePrice, predictions)
 ```
+
+An average error of $30,834.83 is observed in the training fold with the model explaining about 85% of the variance in sale price. This model meets the minimum requirements and can proceed to be utilized on the validation fold. 
 
 ```{r}
 # Get predictions for the validation fold
 predictions.v <- predict(model, newdata = validation_fold)
 
-# Calculate RMSE and R-squared
+# Calculate RMSE and R-squared for validation fold
 rmse(validation_fold$SalePrice, predictions.v)
 R2(validation_fold$SalePrice, predictions.v)
 ```
+
+An average error of $26,845.4 is observed in the training fold with the model explaining about 88% of the variance in sale price. This model performs better on the validation fold and is reliable for predicting sale prices on new data. 
 
 # Predictions
 
@@ -264,5 +285,16 @@ head(submission)
 write.csv(submission, "kaggle_group_submission.csv", row.names = F)
 ```
 
+# Kaggle Score and Rank
 
+-**Score**: 0.14390
+
+
+-**Rank**: 2883
+
+# List of Contributions
+
+-**Anna**: Editor, provided code for models, commented on model fit, formatted and submitted to Kaggle
+
+-**Tina**: 
 
