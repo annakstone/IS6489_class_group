@@ -32,9 +32,9 @@ test <- read.csv("C:/Users/young/OneDrive/Documents/Masters/IS 6489 Stats and Pr
 
 # Introduction
 
-This project is to create a model to predict house prices in Ames, Iowa. The testing and training data consists of 1,460 observations and contains 79 explanatory variables. By using all or some combination of variables in the data to find what buyers are looking for and the estimated price for each home.   
+This project is to create a model to predict house prices in Ames, Iowa. The testing and training data consists of 1,460 observations and contains 79 explanatory variables.   
 
-The predictive model developed in this notebook will utilize 13 out of the 79 available variables. We combined the predictors using a mixture of additive and interaction methods to enhance the model's performance. A list of variables selected are in the explaination of the variables section. 
+The predictive model will focus on 13 variables combined with a mixture of additive and interaction methods to predict the target variable, sale price. A list of variables selected are in the selected variables section. 
 
 # Description of Data
 
@@ -165,7 +165,8 @@ i <- lm(SalePrice ~ GarageCars * GrLivArea, data = train)
 summary(i)
 ```
 
-Variables below were selected for their p-value significance when run agains SalePrice individually. 
+Variables below were selected for their p-value significance when run against SalePrice individually. OverallCond is an exception, when added to the final model it became statistically significant.
+
 1) **ExterQual**: Evaluates the quality of the material on the exterior
 2) **KitchenQual**: Kitchen quality
 3) **OverallQual**: Rates the overall material and finish of the house
@@ -230,7 +231,7 @@ rmse(validation_fold$SalePrice, predictions.v)
 R2(validation_fold$SalePrice, predictions.v)
 ```
 
-An average error of $26,845.4 is observed in the training fold with the model explaining about 88% of the variance in sale price. This model performs better on the validation fold and is reliable for predicting sale prices on new data. 
+An average error of $26,845.4 is observed in the training fold with the model explaining about 88% of the variance in sale price. This model performs better on the validation fold and is reliable for predicting sale price on new data. 
 
 # Predictions
 
@@ -297,7 +298,7 @@ write.csv(submission, "kaggle_group_submission.csv", row.names = F)
 
 # List of Contributions
 
--**Anna**: Editor, provided code for models, commented on model fit, formatted and submitted to Kaggle
+-**Anna**: Editor, provided code for models, commented on model fit, selection of variables, formatted and submitted to Kaggle
 
--**Tina**: 
+-**Tina**: Editor, cleaned data, created GitHub workspace for collaboration, introduction, selection of variables
 
