@@ -162,7 +162,7 @@ summary(r13)
 i <- lm(SalePrice ~ GarageCars * GrLivArea, data = train)
 summary(i)
 ```
-
+When ran indivdually, each of the below variables had significan p-values against SalePrice. 
 1) **ExterQual**: Evaluates the quality of the material on the exterior
 2) **KitchenQual**: Kitchen quality
 3) **OverallQual**: Rates the overall material and finish of the house
